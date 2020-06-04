@@ -24,23 +24,23 @@ describe('harness', () => {
   beforeEach(harness.setup)
   afterEach(harness.teardown)
 
-  test('receive-with-intercept-uri', async () => {
+  test('receive-intercept', async () => {
     await harness.run(async cx => {
-      cx.expect().get('https://api.github.com/repos/ploys/tests/commits').reply(200, [])
+      cx.intercept().get('/repos/ploys/tests/commits').reply(200, [])
 
       await cx.receive('push', {})
     })
   })
 
-  test('receive-with-intercept-path', async () => {
+  test('receive-intercept-expected', async () => {
     await harness.run(async cx => {
-      cx.expect().get('/repos/ploys/tests/commits').reply(200, [])
+      cx.expect().intercept().get('/repos/ploys/tests/commits').reply(200, [])
 
       await cx.receive('push', {})
     })
   })
 
-  test('receive-without-intercept', async () => {
+  test('receive-intercept-missing', async () => {
     expect.assertions(1)
 
     try {
@@ -69,13 +69,19 @@ describe('harness', () => {
 
     try {
       await harness.run(async cx => {
-        cx.expect().get('https://api.github.com/repos/ploys/tests/commits').reply(200, [])
-        cx.expect().get('https://api.github.com/repos/ploys/tests/branches/master').reply(200, [])
+        cx.expect().intercept().get('/repos/ploys/tests/commits').reply(200, [])
+        cx.expect().intercept().get('/repos/ploys/tests/branches/master').reply(200, [])
       }, 1000)
     } catch (err) {
       expect(err.message).toMatch('Timed out in 1000 ms')
       expect(err.message).toMatch('/repos/ploys/tests/commits')
       expect(err.message).toMatch('/repos/ploys/tests/branches/master')
     }
+  })
+
+  test('intercept-ignored', async () => {
+    await harness.run(async cx => {
+      cx.intercept().get('/repos/ploys/tests/commits').reply(200, [])
+    })
   })
 })
