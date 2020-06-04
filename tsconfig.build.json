@@ -1,4 +1,10 @@
 {
   "extends": "./tsconfig.json",
-  "exclude": ["node_modules"]
+  "compilerOptions": {
+    "outDir": "./lib",
+    "rootDir": "./src",
+    "tsBuildInfoFile": "./lib/tsbuildinfo.json"
+  },
+  "include": ["src"],
+  "exclude": ["lib", "tests", "node_modules", "**/*.test.ts", "**/*.spec.ts"]
 }

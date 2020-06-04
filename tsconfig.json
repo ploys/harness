@@ -4,15 +4,12 @@
     "module": "commonjs",
     "moduleResolution": "node",
     "lib": ["es2015", "es2017", "es2019"],
-    "baseUrl": ".",
-    "paths": {
-      "@ploys/harness-*": ["packages/harness-*/src"]
-    },
     "declaration": true,
     "strict": true,
     "pretty": true,
     "incremental": true,
     "esModuleInterop": true,
     "resolveJsonModule": true
-  }
+  },
+  "exclude": ["lib", "node_modules"]
 }
