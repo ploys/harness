@@ -1,6 +1,5 @@
 import { Webhooks } from '@octokit/webhooks'
-import { Interceptor, Scope, default as nock } from 'nock'
-import { URL } from 'url'
+import { Scope, Options, default as nock } from 'nock'
 
 import * as uuid from 'uuid'
 
@@ -88,6 +87,16 @@ export class Context {
   }
 
   /**
+   * Intercepts a request.
+   *
+   * @param host - The request host
+   * @param options - The intercept options.
+   */
+  public intercept(host: string | RegExp = 'https://api.github.com', options?: Options): Scope {
+    return nock(host, options)
+  }
+
+  /**
    * Gets the pending requests.
    *
    * @returns The pending requests.
@@ -122,107 +131,18 @@ export class Expect {
   private readonly promises: Array<Promise<void>> = []
 
   /**
-   * Expects that a request is intercepted.
+   * Intercepts and expects a request.
    *
-   * @param uri - The request URI.
-   * @param method - The request method.
+   * @param host - The request host
+   * @param options - The intercept options.
    */
-  public intercept(uri: string, method: string): Interceptor {
-    const url = new URL(uri, 'https://api.github.com')
-    const scope = nock(`${url.protocol}//${url.host}`)
+  public intercept(host: string | RegExp = 'https://api.github.com', options?: Options): Scope {
+    const scope = nock(host, options)
 
     this.scopes.push(scope)
     this.promises.push(new Promise(resolve => scope.on('replied', () => resolve())))
 
-    return scope.intercept(url.pathname, method)
-  }
-
-  /**
-   * Expects that a GET request is intercepted.
-   *
-   * @param uri - The request URI.
-   *
-   * @returns The request interceptor.
-   */
-  public get(uri: string): Interceptor {
-    return this.intercept(uri, 'GET')
-  }
-
-  /**
-   * Expects that a POST request is intercepted.
-   *
-   * @param uri - The request URI.
-   *
-   * @returns The request interceptor.
-   */
-  public post(uri: string): Interceptor {
-    return this.intercept(uri, 'POST')
-  }
-
-  /**
-   * Expects that a PUT request is intercepted.
-   *
-   * @param uri - The request URI.
-   *
-   * @returns The request interceptor.
-   */
-  public put(uri: string): Interceptor {
-    return this.intercept(uri, 'PUT')
-  }
-
-  /**
-   * Expects that a HEAD request is intercepted.
-   *
-   * @param uri - The request URI.
-   *
-   * @returns The request interceptor.
-   */
-  public head(uri: string): Interceptor {
-    return this.intercept(uri, 'HEAD')
-  }
-
-  /**
-   * Expects that a PATCH request is intercepted.
-   *
-   * @param uri - The request URI.
-   *
-   * @returns The request interceptor.
-   */
-  public patch(uri: string): Interceptor {
-    return this.intercept(uri, 'PATCH')
-  }
-
-  /**
-   * Expects that a MERGE request is intercepted.
-   *
-   * @param uri - The request URI.
-   *
-   * @returns The request interceptor.
-   */
-  public merge(uri: string): Interceptor {
-    return this.intercept(uri, 'MERGE')
-  }
-
-  /**
-   * Expects that a DELETE request is intercepted.
-   *
-   * @param uri - The request URI.
-   *
-   * @returns The request interceptor.
-   */
-  public delete(uri: string): Interceptor {
-    return this.intercept(uri, 'DELETE')
-  }
-
-  /**
-   * Expects that a OPTIONS request is intercepted.
-   *
-   * @param uri - The request URI.
-   *
-   * @returns The request interceptor.
-   */
-  public options(uri: string): Interceptor {
-    return this.intercept(uri, 'OPTIONS')
+    return scope
   }
 
   /**
