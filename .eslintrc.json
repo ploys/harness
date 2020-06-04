@@ -2,7 +2,7 @@
   "root": true,
   "overrides": [
     {
-      "files": ["packages/*/src/**/*.ts"],
+      "files": ["src/**/*.ts"],
       "excludedFiles": ["**/*.test.ts", "**/*.spec.ts"],
       "plugins": ["github", "eslint-plugin-tsdoc"],
       "extends": ["plugin:github/recommended", "plugin:github/typescript"],
@@ -25,7 +25,7 @@
       }
     },
     {
-      "files": ["packages/*/tests/**/*.ts", "packages/*/src/**/*.test.ts", "packages/*/src/**/*.spec.ts"],
+      "files": ["tests/**/*.ts", "src/**/*.test.ts", "src/**/*.spec.ts"],
       "plugins": ["jest", "github", "eslint-plugin-tsdoc"],
       "extends": ["plugin:github/recommended", "plugin:github/typescript"],
       "parser": "@typescript-eslint/parser",
