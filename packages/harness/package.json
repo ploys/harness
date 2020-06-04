@@ -1,0 +1,18 @@
+{
+  "name": "@ploys/harness",
+  "version": "1.0.0",
+  "description": "A GitHub App test harness",
+  "author": "Daniel Balcomb <daniel.balcomb@gmail.com>",
+  "license": "ISC",
+  "private": true,
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "scripts": {
+    "build": "tsc --build tsconfig.build.json",
+    "clean": "tsc --build tsconfig.build.json --clean"
+  },
+  "devDependencies": {
+    "@types/jest": "^25.2.3",
+    "@types/node": "^14.0.5"
+  }
+}
