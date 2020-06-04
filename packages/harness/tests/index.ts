@@ -10,6 +10,10 @@ describe('harness', () => {
       await request('GET /repos/ploys/tests/commits')
     })
 
+    webhooks.on('issues.opened', async () => {
+      await new Promise(resolve => setTimeout(resolve, 2000))
+    })
+
     return {
       webhooks() {
         return webhooks
@@ -37,14 +41,41 @@ describe('harness', () => {
   })
 
   test('receive-without-intercept', async () => {
+    expect.assertions(1)
+
     try {
       await harness.run(async cx => {
         await cx.receive('push', {})
       })
-    } catch {
-      return
+    } catch (err) {
+      expect(err.message).toMatch('Webhook handler error')
     }
+  })
 
-    throw new Error('Expected an error')
+  test('receive-timeout', async () => {
+    expect.assertions(1)
+
+    try {
+      await harness.run(async cx => {
+        await cx.receive('issues', { action: 'opened' })
+      }, 1000)
+    } catch (err) {
+      expect(err.message).toMatch('Timed out in 1000 ms')
+    }
+  })
+
+  test('intercept-timeout', async () => {
+    expect.assertions(3)
+
+    try {
+      await harness.run(async cx => {
+        cx.expect().get('https://api.github.com/repos/ploys/tests/commits').reply(200, [])
+        cx.expect().get('https://api.github.com/repos/ploys/tests/branches/master').reply(200, [])
+      }, 1000)
+    } catch (err) {
+      expect(err.message).toMatch('Timed out in 1000 ms')
+      expect(err.message).toMatch('/repos/ploys/tests/commits')
+      expect(err.message).toMatch('/repos/ploys/tests/branches/master')
+    }
   })
 })

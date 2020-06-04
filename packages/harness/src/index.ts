@@ -45,12 +45,16 @@ export class Harness {
    * Runs the test harness.
    *
    * @param fn - The test callback.
+   * @param ms - The timeout in milliseconds.
    */
-  public async run(fn: (cx: Context) => Promise<void>): Promise<void> {
+  public async run(fn: (cx: Context) => Promise<void>, ms = 4500): Promise<void> {
     const cx = new Context(await this.fn())
+    const go = async () => {
+      await fn(cx)
+      await cx.done()
+    }
 
-    await fn(cx)
-    await cx.done()
+    await timeout(cx, go(), ms)
   }
 }
 
@@ -81,6 +85,15 @@ export class Context {
     this.expects.push(expect)
 
     return expect
+  }
+
+  /**
+   * Gets the pending requests.
+   *
+   * @returns The pending requests.
+   */
+  public pending(): string[] {
+    return this.expects.map(expect => expect.pending()).flat()
   }
 
   /**
@@ -213,9 +226,53 @@ export class Expect {
   }
 
   /**
+   * Gets the pending requests.
+   *
+   * @returns The pending requests.
+   */
+  public pending(): string[] {
+    return this.scopes.map(scope => scope.pendingMocks()).flat()
+  }
+
+  /**
    * Returns when all promises have been completed.
    */
   public async done(): Promise<void> {
     await Promise.all(this.promises)
   }
+}
+
+/**
+ * Races a promise with a timeout.
+ *
+ * @param cx - The context.
+ * @param pm - The promise.
+ * @param ms - The timeout in milliseconds.
+ */
+export function timeout(cx: Context, pm: Promise<void>, ms: number): Promise<void> {
+  let out: NodeJS.Timeout
+
+  const timer: Promise<void> = new Promise((_, reject) => {
+    out = setTimeout(() => {
+      let msg = `Timed out in ${ms} ms`
+      const pending = cx.pending()
+
+      if (pending.length > 0) {
+        msg += ' expecting:\n'
+        msg += pending.map(item => `- ${item.toLowerCase()}`).join('\n')
+      }
+
+      reject(new Error(msg))
+    }, ms)
+  })
+
+  const done = async () => {
+    try {
+      await pm
+    } finally {
+      if (out) clearTimeout(out)
+    }
+  }
+
+  return Promise.race([timer, done()])
 }
