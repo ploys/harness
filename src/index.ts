@@ -1,6 +1,7 @@
-import { Webhooks } from '@octokit/webhooks'
-import { Scope, Options, default as nock } from 'nock'
+import type { Webhooks } from '@octokit/webhooks'
+import type { Scope, Options } from 'nock'
 
+import nock from 'nock'
 import * as uuid from 'uuid'
 
 /**
